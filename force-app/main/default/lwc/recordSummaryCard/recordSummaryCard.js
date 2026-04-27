@@ -14,10 +14,18 @@ const VALID_THEMES = new Set([
 export default class RecordSummaryCard extends NavigationMixin(LightningElement) {
     @api recordId;
     @api objectApiName;
-    @api openDateField;
-    @api closeDateField;
     @api cardTitle;
     @api theme;
+
+    // Normalize optional props to '' so @wire never sees undefined and suppresses the call
+    _openDateField = '';
+    _closeDateField = '';
+
+    @api get openDateField() { return this._openDateField; }
+    set openDateField(val) { this._openDateField = val ?? ''; }
+
+    @api get closeDateField() { return this._closeDateField; }
+    set closeDateField(val) { this._closeDateField = val ?? ''; }
 
     _wiredResult;
     metrics = {};
