@@ -23,43 +23,30 @@ public with sharing class RecordSummaryController {
 
         MetricResult result = new MetricResult();
         Date today = Date.today();
+        Datetime now = Datetime.now();
 
-        // Open tasks (ActivityDate in future or null, Status != Completed/Deferred)
-        result.openActivities = [
-            SELECT COUNT()
-            FROM Task
-            WHERE WhatId = :recordId
-            AND IsClosed = false
-            WITH SECURITY_ENFORCED
-        ];
+        // Contact and Lead relate activities via WhoId; all other objects use WhatId
+        String activityField = isWhoObject(objectApiName) ? 'WhoId' : 'WhatId';
 
-        // Overdue open tasks
-        result.overdueActivities = [
-            SELECT COUNT()
-            FROM Task
-            WHERE WhatId = :recordId
-            AND IsClosed = false
-            AND ActivityDate < :today
-            WITH SECURITY_ENFORCED
-        ];
+        result.openActivities = Database.countQuery(
+            'SELECT COUNT() FROM Task WHERE ' + activityField + ' = :recordId ' +
+            'AND IsClosed = false WITH SECURITY_ENFORCED'
+        );
 
-        // Completed tasks
-        Integer completedTasks = [
-            SELECT COUNT()
-            FROM Task
-            WHERE WhatId = :recordId
-            AND IsClosed = true
-            WITH SECURITY_ENFORCED
-        ];
+        result.overdueActivities = Database.countQuery(
+            'SELECT COUNT() FROM Task WHERE ' + activityField + ' = :recordId ' +
+            'AND IsClosed = false AND ActivityDate < :today WITH SECURITY_ENFORCED'
+        );
 
-        // Past events (ended before now)
-        Integer pastEvents = [
-            SELECT COUNT()
-            FROM Event
-            WHERE WhatId = :recordId
-            AND EndDateTime <= :Datetime.now()
-            WITH SECURITY_ENFORCED
-        ];
+        Integer completedTasks = Database.countQuery(
+            'SELECT COUNT() FROM Task WHERE ' + activityField + ' = :recordId ' +
+            'AND IsClosed = true WITH SECURITY_ENFORCED'
+        );
+
+        Integer pastEvents = Database.countQuery(
+            'SELECT COUNT() FROM Event WHERE ' + activityField + ' = :recordId ' +
+            'AND EndDateTime <= :now WITH SECURITY_ENFORCED'
+        );
 
         result.completedActivities = completedTasks + pastEvents;
 
@@ -90,6 +77,13 @@ public with sharing class RecordSummaryController {
         }
 
         return result;
+    }
+
+    // Contact and Lead use WhoId on Task/Event; every other object uses WhatId.
+    private static Boolean isWhoObject(String objectApiName) {
+        if (String.isBlank(objectApiName)) return false;
+        String lower = objectApiName.toLowerCase();
+        return lower == 'contact' || lower == 'lead';
     }
 
     // Validates the field name exists on the object before issuing dynamic SOQL,
