@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <masterLabel>Modern Record List</masterLabel>
+    <description>A modern, website-style record list for Experience Cloud sites. Displays Salesforce records with colored status/priority pills, stat cards, tab filtering, search, and pagination — designed for external audiences, not repurposed from internal Lightning.</description>
+    <targets>
+        <target>lightningCommunity__Page</target>
+        <target>lightningCommunity__Default</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightningCommunity__Default">
+
+            <!-- Core data -->
+            <property name="objectApiName"
+                      type="String"
+                      label="Object API Name"
+                      description="Salesforce object to query (e.g. Case, Application__c, Payment__c)"
+                      required="true" />
+
+            <property name="displayFields"
+                      type="String"
+                      label="Display Fields (comma-separated)"
+                      description="Field API names to show as columns, e.g. CaseNumber,Subject,Status,Priority"
+                      default="Name,Status" />
+
+            <property name="nameField"
+                      type="String"
+                      label="Name / Title Field"
+                      description="Field rendered as the clickable record link in the first column"
+                      default="Name" />
+
+            <property name="statusField"
+                      type="String"
+                      label="Status Field API Name"
+                      description="Field whose values get colored status pills (e.g. Status)"
+                      default="Status" />
+
+            <property name="priorityField"
+                      type="String"
+                      label="Priority Field API Name"
+                      description="Field whose values get colored priority pills (e.g. Priority). Leave blank to hide." />
+
+            <property name="filterField"
+                      type="String"
+                      label="Filter / Tab Field"
+                      description="Field used to build the stat cards and filter tabs (usually the same as Status Field)"
+                      default="Status" />
+
+            <!-- Display -->
+            <property name="listTitle"
+                      type="String"
+                      label="List Title"
+                      default="Records" />
+
+            <property name="subtitle"
+                      type="String"
+                      label="Subtitle"
+                      description="Optional subtitle shown below the title" />
+
+            <property name="theme"
+                      type="String"
+                      label="Color Theme"
+                      description="'light' or 'dark'"
+                      default="light"
+                      datasource="light,dark" />
+
+            <property name="showSearch"
+                      type="Boolean"
+                      label="Show Search Bar"
+                      default="true" />
+
+            <property name="showCheckboxes"
+                      type="Boolean"
+                      label="Show Row Checkboxes"
+                      default="true" />
+
+            <property name="pageSize"
+                      type="Integer"
+                      label="Rows per Page"
+                      default="10"
+                      min="5"
+                      max="100" />
+
+            <!-- Create button -->
+            <property name="showCreateButton"
+                      type="Boolean"
+                      label="Show Create Button"
+                      default="false" />
+
+            <property name="createButtonLabel"
+                      type="String"
+                      label="Create Button Label"
+                      default="New Record" />
+
+            <!-- Navigation -->
+            <property name="recordPageName"
+                      type="String"
+                      label="Record Detail Page Name"
+                      description="Experience Cloud named page to navigate to on row click. Leave blank to use standard record page." />
+
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>

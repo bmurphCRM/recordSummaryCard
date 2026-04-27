@@ -1,0 +1,237 @@
+<template>
+    <div class={wrapperClass}>
+
+        <!-- ── Page header ─────────────────────────────────────────────── -->
+        <div class="erl-header">
+            <div class="erl-header__left">
+                <h1 class="erl-header__title">{listTitle}</h1>
+                <template lwc:if={showSubtitle}>
+                    <p class="erl-header__subtitle">{subtitle}</p>
+                </template>
+            </div>
+            <div class="erl-header__actions">
+                <template lwc:if={showCreateButton}>
+                    <button class="erl-btn erl-btn--primary" onclick={handleCreate} aria-label={createButtonLabel}>
+                        <span class="erl-btn__icon" aria-hidden="true">+</span>
+                        {createButtonLabel}
+                    </button>
+                </template>
+            </div>
+        </div>
+
+        <!-- ── Stat cards row ──────────────────────────────────────────── -->
+        <template lwc:if={hasStats}>
+            <div class="erl-stats" role="list" aria-label="Record counts by status">
+                <template for:each={displayStats} for:item="stat">
+                    <div key={stat.filterValue}
+                         class={stat.cardClass}
+                         role="listitem"
+                         tabindex="0"
+                         aria-label={stat.ariaLabel}
+                         data-filter={stat.filterValue}
+                         onclick={handleStatCardClick}
+                         onkeydown={handleStatKeyDown}>
+                        <span class="erl-stat__label">{stat.label}</span>
+                        <span class="erl-stat__count">{stat.count}</span>
+                        <div class="erl-stat__sparkline" aria-hidden="true">
+                            <svg viewBox="0 0 80 30" preserveAspectRatio="none">
+                                <polyline points={stat.sparkPoints} class="erl-stat__spark-line"></polyline>
+                                <polygon points={stat.sparkFill} class="erl-stat__spark-fill"></polygon>
+                            </svg>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </template>
+
+        <!-- ── Table panel ─────────────────────────────────────────────── -->
+        <div class="erl-panel">
+
+            <!-- Tab bar + search row -->
+            <div class="erl-toolbar">
+                <div class="erl-tabs" role="tablist" aria-label="Filter records">
+                    <template for:each={tabs} for:item="tab">
+                        <button key={tab.value}
+                                role="tab"
+                                class={tab.tabClass}
+                                aria-selected={tab.isActive}
+                                data-value={tab.value}
+                                onclick={handleTabClick}>
+                            {tab.label}
+                        </button>
+                    </template>
+                </div>
+                <div class="erl-toolbar__right">
+                    <template lwc:if={showSearch}>
+                        <div class="erl-search" role="search">
+                            <span class="erl-search__icon" aria-hidden="true">
+                                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.5"/>
+                                    <line x1="9.95" y1="9.95" x2="13" y2="13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                </svg>
+                            </span>
+                            <input type="search"
+                                   class="erl-search__input"
+                                   placeholder={searchPlaceholder}
+                                   value={searchTerm}
+                                   aria-label="Search records"
+                                   oninput={handleSearchInput}
+                                   onkeydown={handleSearchKeyDown} />
+                        </div>
+                    </template>
+                </div>
+            </div>
+
+            <!-- Loading state -->
+            <template lwc:if={isLoading}>
+                <div class="erl-loading" aria-busy="true" aria-label="Loading records">
+                    <div class="erl-skeleton">
+                        <template for:each={skeletonRows} for:item="row">
+                            <div key={row} class="erl-skeleton__row">
+                                <div class="erl-skeleton__cell erl-skeleton__cell--sm"></div>
+                                <div class="erl-skeleton__cell erl-skeleton__cell--lg"></div>
+                                <div class="erl-skeleton__cell erl-skeleton__cell--md"></div>
+                                <div class="erl-skeleton__cell erl-skeleton__cell--sm"></div>
+                                <div class="erl-skeleton__cell erl-skeleton__cell--md"></div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </template>
+
+            <!-- Error state -->
+            <template lwc:elseif={hasError}>
+                <div class="erl-empty" role="alert">
+                    <div class="erl-empty__icon" aria-hidden="true">⚠</div>
+                    <p class="erl-empty__text">{errorMessage}</p>
+                    <button class="erl-btn erl-btn--ghost" onclick={handleRefresh}>Try again</button>
+                </div>
+            </template>
+
+            <!-- Empty state -->
+            <template lwc:elseif={isEmpty}>
+                <div class="erl-empty">
+                    <div class="erl-empty__icon" aria-hidden="true">📋</div>
+                    <p class="erl-empty__text">No records found</p>
+                    <template lwc:if={hasActiveFilter}>
+                        <button class="erl-btn erl-btn--ghost" onclick={handleClearFilter}>Clear filters</button>
+                    </template>
+                </div>
+            </template>
+
+            <!-- Data table -->
+            <template lwc:else>
+                <div class="erl-table-wrap" role="region" aria-label={tableAriaLabel}>
+                    <table class="erl-table" aria-rowcount={totalCount}>
+                        <thead>
+                            <tr>
+                                <template lwc:if={showCheckboxes}>
+                                    <th class="erl-table__th erl-table__th--check" scope="col">
+                                        <input type="checkbox"
+                                               class="erl-checkbox"
+                                               aria-label="Select all rows"
+                                               checked={allSelected}
+                                               onchange={handleSelectAll} />
+                                    </th>
+                                </template>
+                                <template for:each={columnHeaders} for:item="col">
+                                    <th key={col.key} class={col.thClass} scope="col" aria-sort={col.ariaSort}>
+                                        <button class="erl-table__sort-btn" onclick={handleSort} data-field={col.key}>
+                                            {col.label}
+                                            <template lwc:if={col.isSorted}>
+                                                <span class="erl-table__sort-icon" aria-hidden="true">{col.sortIcon}</span>
+                                            </template>
+                                        </button>
+                                    </th>
+                                </template>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template for:each={rows} for:item="row">
+                                <tr key={row.recordId}
+                                    class={row.rowClass}
+                                    onclick={handleRowClick}
+                                    data-id={row.recordId}
+                                    tabindex="0"
+                                    onkeydown={handleRowKeyDown}
+                                    aria-label={row.ariaLabel}>
+
+                                    <template lwc:if={showCheckboxes}>
+                                        <td class="erl-table__td erl-table__td--check" onclick={handleCheckboxClick}>
+                                            <input type="checkbox"
+                                                   class="erl-checkbox"
+                                                   aria-label={row.checkboxAriaLabel}
+                                                   checked={row.isSelected}
+                                                   data-id={row.recordId}
+                                                   onchange={handleRowSelect} />
+                                        </td>
+                                    </template>
+
+                                    <!-- Name / title column (always first) -->
+                                    <td class="erl-table__td erl-table__td--name">
+                                        <button class="erl-record-link"
+                                                onclick={handleNameClick}
+                                                data-id={row.recordId}
+                                                aria-label={row.nameLinkAria}>
+                                            {row.name}
+                                        </button>
+                                    </td>
+
+                                    <!-- Dynamic field columns -->
+                                    <template for:each={row.fieldCells} for:item="cell">
+                                        <td key={cell.key} class="erl-table__td">
+                                            <template lwc:if={cell.isPill}>
+                                                <span class={cell.pillClass} title={cell.value}>{cell.value}</span>
+                                            </template>
+                                            <template lwc:else>
+                                                <span class="erl-table__cell-text" title={cell.value}>{cell.value}</span>
+                                            </template>
+                                        </td>
+                                    </template>
+
+                                    <!-- Last modified -->
+                                    <td class="erl-table__td erl-table__td--date">
+                                        <span class="erl-table__cell-text">{row.lastModifiedLabel}</span>
+                                    </td>
+
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination footer -->
+                <div class="erl-pagination" aria-label="Pagination">
+                    <span class="erl-pagination__info">{paginationLabel}</span>
+                    <div class="erl-pagination__controls">
+                        <button class="erl-pagination__btn"
+                                disabled={isPrevDisabled}
+                                onclick={handlePrevPage}
+                                aria-label="Previous page">&#8592;</button>
+                        <template for:each={pageNumbers} for:item="pg">
+                            <button key={pg.num}
+                                    class={pg.btnClass}
+                                    onclick={handlePageClick}
+                                    data-page={pg.num}
+                                    aria-label={pg.ariaLabel}
+                                    aria-current={pg.isCurrent}>
+                                {pg.num}
+                            </button>
+                        </template>
+                        <button class="erl-pagination__btn"
+                                disabled={isNextDisabled}
+                                onclick={handleNextPage}
+                                aria-label="Next page">&#8594;</button>
+                    </div>
+                </div>
+            </template>
+
+        </div><!-- /erl-panel -->
+
+        <!-- Live region for screen reader announcements -->
+        <div aria-live="polite" aria-atomic="true" class="erl-sr-only">
+            {liveAnnouncement}
+        </div>
+
+    </div>
+</template>
