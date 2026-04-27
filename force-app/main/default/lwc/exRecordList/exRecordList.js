@@ -169,8 +169,9 @@ export default class ExRecordList extends NavigationMixin(LightningElement) {
 
     get columnHeaders() {
         const fields = this._parseFields();
+        const nameKey = this.nameField || 'Name';
         const cols = [
-            { key: this.nameField || 'Name', label: this._fieldLabel(this.nameField || 'Name'), isNameCol: true }
+            { key: nameKey, label: this._fieldLabel(nameKey), isNameCol: true }
         ];
         for (const f of fields) {
             if (f.toLowerCase() === (this.nameField || 'Name').toLowerCase()) continue;
@@ -206,8 +207,9 @@ export default class ExRecordList extends NavigationMixin(LightningElement) {
 
         return rawRows.map(r => {
             const isSelected = this._selectedIds.has(r.recordId);
+            const nameFieldLow = (this.nameField || 'Name').toLowerCase();
             const fieldCells = fields
-                .filter(f => f.toLowerCase() !== (this.nameField || 'name').toLowerCase())
+                .filter(f => f.toLowerCase() !== nameFieldLow)
                 .map(f => {
                     const fLow = f.toLowerCase();
                     const value = r.fields?.[f] ?? '';

@@ -85,8 +85,8 @@ public with sharing class ExRecordListController {
 
         // Parse + validate requested display fields
         List<String> requestedFields = parseFieldList(displayFields);
-        List<String> safeFields = new List<String>{ 'Id', 'Name', 'LastModifiedDate' };
-        Set<String> addedLower = new Set<String>{ 'id', 'name', 'lastmodifieddate' };
+        List<String> safeFields = new List<String>{ 'Id', 'LastModifiedDate' };
+        Set<String> addedLower = new Set<String>{ 'id', 'lastmodifieddate' };
 
         for (String f : requestedFields) {
             String fLow = f.toLowerCase();
@@ -118,7 +118,13 @@ public with sharing class ExRecordListController {
         result.rows        = new List<RecordRow>();
 
         List<SObject> records = Database.query(dataSoql);
-        String resolvedNameField = String.isNotBlank(nameField) ? nameField : 'Name';
+        // Use nameField if it exists on the object, otherwise fall back to 'Name' if present, else use Id
+        String resolvedNameField = 'Id';
+        if (String.isNotBlank(nameField) && allFields.containsKey(nameField.toLowerCase())) {
+            resolvedNameField = nameField;
+        } else if (allFields.containsKey('name')) {
+            resolvedNameField = 'Name';
+        }
 
         for (SObject rec : records) {
             RecordRow row    = new RecordRow();
