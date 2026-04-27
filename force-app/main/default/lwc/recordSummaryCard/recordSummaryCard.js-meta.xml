@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<LightningComponentBundle xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>62.0</apiVersion>
+    <isExposed>true</isExposed>
+    <targets>
+        <target>lightning__RecordPage</target>
+        <target>lightning__AppPage</target>
+        <target>lightning__HomePage</target>
+    </targets>
+    <targetConfigs>
+        <targetConfig targets="lightning__RecordPage">
+
+            <property name="cardTitle" type="String" label="Card Title"
+                      description="Custom heading shown at the top of the card. Defaults to 'Record Summary' when left blank." />
+
+            <property name="theme" type="String" label="Color Theme"
+                      description="Visual theme for the card. Choose one of the 10 available color schemes."
+                      datasource="default,ocean,forest,sunset,violet,slate,midnight,coral,gold,aurora"
+                      default="default" />
+
+            <property name="objectApiName" type="String" label="Object API Name"
+                      description="API name of the object on this record page (e.g. Account, Contact). Auto-populated by the {!objectApiName} token." />
+
+            <property name="openDateField" type="String" label="Open Date Field API Name"
+                      description="API name of the Date or DateTime field that marks when the record was opened (e.g. CreatedDate, Date_Opened__c). Leave blank to hide the Duration metric." />
+
+            <property name="closeDateField" type="String" label="Close Date Field API Name"
+                      description="API name of the Date or DateTime field that marks when the record was closed (e.g. ClosedDate, Date_Closed__c). Leave blank to calculate duration against the current time for open records." />
+
+        </targetConfig>
+    </targetConfigs>
+</LightningComponentBundle>
