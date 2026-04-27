@@ -45,8 +45,6 @@ A configurable, any-object record summary card for Salesforce Lightning Experien
 
 The card renders all five tiles in a single row at standard Lightning record page widths (≥ 480 px). Below 480 px it collapses gracefully to 3 columns, then 2 columns on the narrowest viewports.
 
-
-```
 <img width="1681" height="705" alt="image" src="https://github.com/user-attachments/assets/54d7dd60-4dce-470a-aab3-c1d35d8cc52d" />
 
 
