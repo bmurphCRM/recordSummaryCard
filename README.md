@@ -2,6 +2,9 @@
 
 A configurable, any-object record summary card for Salesforce Lightning Experience. Displays up to five real-time metrics in a single responsive row on any record page — open activities, completed activities, notes, files, and an optional record duration with a live clock.
 
+<img width="1681" height="705" alt="image" src="https://github.com/user-attachments/assets/ca272b6b-1d51-4f97-ac76-3481ab9179a8" />
+
+
 ## Components
 
 | Metadata | Type | Description |
