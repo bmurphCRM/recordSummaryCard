@@ -108,7 +108,14 @@ public with sharing class ExRecordListController {
         }
 
         String fieldClause = String.join(safeFields, ', ');
-        String whereClause = buildWhereClause(filterField, filterValue, searchTerm, safeFields, allFields);
+        // Resolve the search field — must exist on the object
+        String searchField = 'Id'; // fallback: effectively no text search
+        if (String.isNotBlank(nameField) && allFields.containsKey(nameField.toLowerCase())) {
+            searchField = nameField;
+        } else if (allFields.containsKey('name')) {
+            searchField = 'Name';
+        }
+        String whereClause = buildWhereClause(filterField, filterValue, searchTerm, searchField, allFields);
         String countSoql   = 'SELECT COUNT() FROM ' + String.escapeSingleQuotes(objectApiName) + whereClause + ' WITH SECURITY_ENFORCED';
         String dataSoql    = 'SELECT ' + fieldClause + ' FROM ' + String.escapeSingleQuotes(objectApiName)
                            + whereClause + ' WITH SECURITY_ENFORCED ORDER BY LastModifiedDate DESC NULLS LAST LIMIT :safeSize OFFSET :safeOffset';
@@ -166,7 +173,7 @@ public with sharing class ExRecordListController {
     private static String buildWhereClause(
         String filterField, String filterValue,
         String searchTerm,
-        List<String> safeFields,
+        String searchField,
         Map<String, Schema.SObjectField> allFields
     ) {
         List<String> conditions = new List<String>();
@@ -177,12 +184,11 @@ public with sharing class ExRecordListController {
             conditions.add(escapedFld + ' = \'' + escapedVal + '\'');
         }
 
-        if (String.isNotBlank(searchTerm) && searchTerm.length() >= 2) {
+        if (String.isNotBlank(searchTerm) && searchTerm.length() >= 2
+                && String.isNotBlank(searchField) && searchField != 'Id'
+                && allFields.containsKey(searchField.toLowerCase())) {
             String escaped = '%' + String.escapeSingleQuotes(searchTerm.trim()) + '%';
-            // Search Name field if available
-            if (allFields.containsKey('name')) {
-                conditions.add('Name LIKE \'' + escaped + '\'');
-            }
+            conditions.add(String.escapeSingleQuotes(searchField) + ' LIKE \'' + escaped + '\'');
         }
 
         return conditions.isEmpty() ? '' : ' WHERE ' + String.join(conditions, ' AND ');
