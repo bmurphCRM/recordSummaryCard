@@ -31,6 +31,11 @@
                          data-filter={stat.filterValue}
                          onclick={handleStatCardClick}
                          onkeydown={handleStatKeyDown}>
+                        <template lwc:if={stat.hasIcon}>
+                            <div class="erl-stat__icon" aria-hidden="true">
+                                <lightning-icon icon-name={stat.iconName} size="small"></lightning-icon>
+                            </div>
+                        </template>
                         <span class="erl-stat__label">{stat.label}</span>
                         <span class="erl-stat__count">{stat.count}</span>
                         <div class="erl-stat__sparkline" aria-hidden="true">

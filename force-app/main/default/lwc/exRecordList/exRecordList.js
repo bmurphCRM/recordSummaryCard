@@ -32,6 +32,8 @@ export default class ExRecordList extends NavigationMixin(LightningElement) {
     @api pageSize        = DEFAULT_PAGE_SIZE;
     @api showSearch      = false;
     @api showCheckboxes  = false;
+    @api showStatCards   = false;        // toggle metric/stat cards row
+    @api statCardIcons   = '';           // comma-separated LDS icon names, e.g. 'standard:case,utility:clock'
     @api showCreateButton = false;
     @api createButtonLabel = 'New Record';
     @api theme           = 'light';     // 'light' | 'dark'
@@ -130,19 +132,28 @@ export default class ExRecordList extends NavigationMixin(LightningElement) {
     // ── Stat cards ──────────────────────────────────────────────────────────
 
     get hasStats() {
-        return (this._data?.stats?.length ?? 0) > 0;
+        return this.showStatCards && (this._data?.stats?.length ?? 0) > 0;
+    }
+
+    get _parsedIcons() {
+        if (!this.statCardIcons) return [];
+        return this.statCardIcons.split(',').map(i => i.trim()).filter(Boolean);
     }
 
     get displayStats() {
+        const icons = this._parsedIcons;
         return (this._data?.stats ?? []).map((s, idx) => {
             const accent = STAT_ACCENT_CLASSES[idx % STAT_ACCENT_CLASSES.length];
             const isActive = s.filterValue === this._activeFilter;
+            const iconName = icons[idx] || '';
             return {
                 ...s,
                 cardClass: `erl-stat ${accent}${isActive ? ' erl-stat--active' : ''}`,
                 ariaLabel: `${s.label}: ${s.count} records`,
                 sparkPoints: SPARKLINE_POINTS[idx % SPARKLINE_POINTS.length],
                 sparkFill:   SPARKLINE_FILLS[idx % SPARKLINE_FILLS.length],
+                iconName,
+                hasIcon: !!iconName,
             };
         });
     }

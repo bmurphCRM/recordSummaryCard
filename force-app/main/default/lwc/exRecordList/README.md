@@ -264,7 +264,7 @@ Tabs are auto-generated from the same aggregate data that populates the stat car
 
 ## Search
 
-The search input filters records by the `Name` field (or the field identified as `nameField`). A 350 ms debounce prevents excessive wire re-executions while the user is typing.
+The search input filters records using the field configured as **Name / Title Field** (`nameField`) — for example `CaseNumber` on Case, `Subject` on Task, or `Name` on objects that have it. A 350 ms debounce prevents excessive wire re-executions while the user is typing.
 
 - Press **Escape** to clear the search term instantly
 - Search resets to page 1 automatically
@@ -446,7 +446,7 @@ The component works against any standard or custom object accessible to the runn
 |---|---|
 | Standard objects (Case, Contact, etc.) | Fully supported |
 | Custom objects | Fully supported — use the `__c` suffix for field and object names |
-| Objects without a `Name` field | Set `nameField` to a different text field (e.g. `CaseNumber` for Case) |
+| Objects without a `Name` field | **Required:** set `nameField` to a field that exists on the object (e.g. `CaseNumber` for Case, `Subject` for Task). The component does not assume `Name` exists — it validates before querying. |
 | Objects with restricted FLS | Fields the running user cannot read are silently excluded by `WITH SECURITY_ENFORCED` |
 | Guest user access | Works for authenticated Experience Cloud users; guest user access requires that the object and fields are exposed via guest user sharing/profiles |
 
@@ -455,7 +455,8 @@ The component works against any standard or custom object accessible to the runn
 ## Known Considerations
 
 - **SOQL queries per page load:** The controller issues 3 queries per request — a `COUNT()` for pagination, a `SELECT` for row data, and a `GROUP BY` aggregate for stat cards. Well within governor limits.
-- **Search scope:** Search currently filters on the `Name` field only (or the field set as `nameField`). It does not perform a full-text search across all displayed fields.
+- **Objects without a `Name` field (e.g. Case):** Always set `nameField` to a field that actually exists on the object — `CaseNumber` for Case, `Subject` for Task, etc. The component validates the field against the object schema before querying and falls back to the record `Id` if the field is missing, but an explicit value gives the best result.
+- **Search scope:** Search currently filters on the `nameField` value. It does not perform a full-text search across all displayed fields.
 - **Sort order:** The server always returns records ordered by `LastModifiedDate DESC`. The client-side sort state (`_sortField`) is tracked in the JS for future use but does not currently re-sort server results.
 - **Stat card count:** Up to 6 distinct `filterField` values are returned by the aggregate query. Objects with more than 6 distinct values will show only the top 6 by record count plus the "All" total.
 - **`OFFSET` governor limit:** Salesforce SOQL does not permit `OFFSET` greater than 2,000. At 10 rows per page this is page 200; at 20 rows per page this is page 100. For very large datasets consider adding a date or ID-based range filter rather than deep pagination.

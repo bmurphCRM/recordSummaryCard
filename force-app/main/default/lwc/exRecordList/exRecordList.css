@@ -204,6 +204,11 @@
     outline-offset: 2px;
 }
 
+/* Stat card icon */
+.erl-stat__icon {
+    margin-bottom: 0.375rem;
+}
+
 .erl-stat__label {
     display: block;
     font-size: 0.75rem;

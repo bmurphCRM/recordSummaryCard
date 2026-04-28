@@ -51,12 +51,13 @@
             <property name="listTitle"
                       type="String"
                       label="List Title"
+                      description="Main heading displayed at the top of the component (e.g. 'My Cases', 'Payment History')"
                       default="Records" />
 
             <property name="subtitle"
                       type="String"
                       label="Subtitle"
-                      description="Optional subtitle shown below the title" />
+                      description="Smaller descriptive text shown directly below the title (e.g. 'View and manage your open cases')" />
 
             <property name="theme"
                       type="String"
@@ -64,6 +65,17 @@
                       description="'light' or 'dark'"
                       default="light"
                       datasource="light,dark" />
+
+            <property name="showStatCards"
+                      type="Boolean"
+                      label="Show Metric Cards"
+                      description="Toggle the KPI stat cards row above the table on or off"
+                      default="true" />
+
+            <property name="statCardIcons"
+                      type="String"
+                      label="Metric Card Icons (comma-separated)"
+                      description="Lightning Design System icon names for each stat card in order, e.g. 'standard:case,utility:clock,action:approval,standard:task'. Browse icons at lightningdesignsystem.com/icons" />
 
             <property name="showSearch"
                       type="Boolean"
