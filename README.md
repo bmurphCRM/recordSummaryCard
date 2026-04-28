@@ -35,3 +35,10 @@ See [`force-app/main/default/lwc/recordSummaryCard/README.md`](force-app/main/de
 - Accessibility notes
 - Security model
 - Known considerations
+
+---
+
+**Documentation Version**: 1.0  
+**Last Updated**: April 26, 2026  
+**Component Version**: 1.0  
+**Author**: Brian Murphy, b.murphy@salesforce.com
